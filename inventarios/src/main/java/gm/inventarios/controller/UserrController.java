@@ -8,11 +8,10 @@ import gm.inventarios.entities.Userr;
 import gm.inventarios.service.IUserrService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -41,4 +40,46 @@ public class UserrController {
         return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/findAll")
+    public ResponseEntity<?> findAll() {
+        List<UserrDTO> userrDTOList = userrService.findAll()
+                .stream()
+                .map(userr -> UserrDTO.builder()
+                        .usrCode(userr.getUsrCode())
+                        .usrName(userr.getUsrName())
+                        .usrPhone(userr.getUsrPhone())
+                        .usrDni(userr.getUsrDni())
+                        .usrIdRol(userr.getUsrIdRol())
+                        .build())
+                .toList();
+
+        return ResponseEntity.ok(userrDTOList);
+
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<?> save(@RequestBody UserrDTO userrDTO) {
+
+        if (userrDTO.getUsrName().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        userrService.save(Userr.builder()
+                .name(userrDTO.getUsrName())
+                .build());
+        return ResponseEntity.created(new URI("/api/userr/save")).build();
+    }
+
+    @PutMapping("/update/{usrCode}")
+    public ResponseEntity<?> update(@RequestBody Long usrCode,@RequestBody UserrDTO userrDTO) {
+
+        Optional<Userr> userrOptional = userrService.findById(usrCode);
+
+        if (userrOptional.isPresent()) {
+            Userr userr = userrOptional.get();
+            userr.setUsrName(userrDTO.getUsrName());
+
+        }
+
+    }
 }

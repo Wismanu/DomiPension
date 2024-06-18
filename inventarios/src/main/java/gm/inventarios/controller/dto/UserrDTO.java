@@ -12,9 +12,6 @@ public class UserrDTO {
 
     private Long usrCode;
 
-
-    private Login login;
-
     private Integer usrIdRol;
     private String usrName;
     private String usrDni;
