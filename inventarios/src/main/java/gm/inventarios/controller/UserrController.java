@@ -6,11 +6,13 @@ package gm.inventarios.controller;
 import gm.inventarios.controller.dto.UserrDTO;
 import gm.inventarios.entities.Userr;
 import gm.inventarios.service.IUserrService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,29 +59,43 @@ public class UserrController {
 
     }
 
+
     @PostMapping("/save")
-    public ResponseEntity<?> save(@RequestBody UserrDTO userrDTO) {
+    public ResponseEntity<?> save(@RequestBody UserrDTO userrDTO) throws URISyntaxException {
 
         if (userrDTO.getUsrName().isBlank()) {
             return ResponseEntity.badRequest().build();
         }
-
         userrService.save(Userr.builder()
-                .name(userrDTO.getUsrName())
+                .usrIdRol(userrDTO.getUsrIdRol())
+                .usrName(userrDTO.getUsrName())
+                .usrDni(userrDTO.getUsrDni())
+                .usrPhone(userrDTO.getUsrPhone())
                 .build());
         return ResponseEntity.created(new URI("/api/userr/save")).build();
     }
 
     @PutMapping("/update/{usrCode}")
-    public ResponseEntity<?> update(@RequestBody Long usrCode,@RequestBody UserrDTO userrDTO) {
+    public ResponseEntity<?> update(@PathVariable Long usrCode,@RequestBody UserrDTO userrDTO) {
 
         Optional<Userr> userrOptional = userrService.findById(usrCode);
 
         if (userrOptional.isPresent()) {
             Userr userr = userrOptional.get();
             userr.setUsrName(userrDTO.getUsrName());
-
+            userrService.save(userr);
+            return ResponseEntity.ok("Registro Actualizado");
         }
+        return ResponseEntity.notFound().build();
+    }
 
+    @DeleteMapping("/delete/{usrCode}")
+    public ResponseEntity<?> deleteById(@PathVariable Long usrCode) {
+
+        if (usrCode != null) {
+            userrService.deleteById(usrCode);
+            return ResponseEntity.ok("Registro Eliminado");
+        }
+        return ResponseEntity.badRequest().build();
     }
 }

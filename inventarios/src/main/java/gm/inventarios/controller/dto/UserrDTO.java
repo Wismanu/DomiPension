@@ -1,6 +1,6 @@
 package gm.inventarios.controller.dto;
 
-import gm.inventarios.entities.Login;
+
 import lombok.*;
 
 @Data
